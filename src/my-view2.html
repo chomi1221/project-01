@@ -1,0 +1,59 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-view2">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+      .red{
+        background: red;
+        background: var(--app-primary-color);
+        color: white;
+      }
+    </style>
+
+    <div class="card">
+        <paper-input label="質問1" id="question"></paper-input>
+        <paper-input label="選択肢1" id="answer1"></paper-input>
+        <paper-input label="選択肢2" id="answer2"></paper-input>
+        <paper-button on-click="submitQuestion" raised class="red">投稿</paper-button>
+    </div>
+  </template>
+
+  <script>
+    class MyView2 extends Polymer.Element {
+      static get is() { return 'my-view2'; }
+
+      submitQuestion(){
+        const question = this.$.question.value
+        const answer1 = this.$.answer1.value
+        const answer2 = this.$.answer2.value
+        const questionObject = {
+          question: question,
+          answer1: answer1,
+          answer2: answer2
+        }
+        window.firebase.database().ref(`questions`).push(questionObject)
+      }
+
+    }
+
+    window.customElements.define(MyView2.is, MyView2);
+  </script>
+</dom-module>

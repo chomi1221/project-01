@@ -1,0 +1,90 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-view1">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 10px;
+      }
+    </style>
+    <firebase-auth id="auth" user="{{user}}" on-error="handleError" status-known="{{statusKnown}}">
+    </firebase-auth>
+      
+    <firebase-query
+        path="/questions"
+        data="{{questions}}">
+    </firebase-query>
+
+    <div class="card">
+        <template is="dom-repeat" items="[[questions]]">
+          <div>[[item.question]]</div>
+          <paper-button raised on-click="chooseAnswer1" data-question-key$="[[item.$key]]">[[item.answer1]]</paper-button>
+          <paper-button raised on-click="chooseAnswer2" data-question-key$="[[item.$key]]">[[item.answer2]]</paper-button>
+        </template>          
+    </div>
+  </template>
+
+  <script>
+    class MyView1 extends Polymer.Element {
+      static get is() { return 'my-view1'; }
+
+      static get properties() {
+        return {
+          questions: {
+            type: Object,
+          },
+          user: {
+            type: Object,
+          },
+          statusKnown: {
+            type: Object,
+          }
+        };
+      }   
+
+      inputAnswer(choice,questionKey){
+        const that = this
+        var promises = []
+        var promise
+        if(!this.user && this.statusKnown){
+          promise = this.$.auth.signInAnonymously()
+          promises.push(promise)
+        }
+        Promise.all(promises).then(res => {
+          console.log('成功')
+          const uid = that.user.uid
+          window.firebase.database().ref(`questions/${questionKey}/stats/${uid}`).set(choice)
+        })
+      }   
+
+      chooseAnswer1(e) {
+        const questionKey = e.target.getAttribute('data-question-key')
+        this.inputAnswer(1,questionKey)
+      }
+
+      chooseAnswer2(e){
+        const questionKey = e.target.getAttribute('data-question-key')
+        this.inputAnswer(2,questionKey)
+
+      }
+
+    }
+
+    window.customElements.define(MyView1.is, MyView1);
+  </script>
+</dom-module>
