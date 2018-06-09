@@ -1,0 +1,164 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../shared-styles.html">
+
+<dom-module id="question-cell">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 10px;
+      }
+
+      div[hidden]{
+        display: none;
+      }
+
+      .bar{
+        background: #eee;
+        transition: width 0.2s;
+      }
+
+      #bar1{
+
+      }
+    </style>
+    <firebase-query
+      path="/questions/[[question.$key]]/stats"
+      data="{{stats}}">
+    </firebase-query>
+
+    <firebase-document
+      path="/questions/[[question.$key]]/stats/[[user.uid]]"
+      data="{{myAnswer}}">
+    </firebase-document>
+
+    <firebase-auth id="auth" user="{{user}}" on-error="handleError" status-known="{{statusKnown}}">
+    </firebase-auth>
+
+    <div>[[question.question]]</div>
+    <div hidden$='[[checkIfAnswered(myAnswer)]]'>
+      <paper-button raised on-click="chooseAnswer1">[[question.answer1]]</paper-button>
+      <paper-button raised on-click="chooseAnswer2">[[question.answer2]]</paper-button>  
+    </div>
+    <div hidden$='[[!checkIfAnswered(myAnswer)]]'>
+      <!--回答表示-->
+      <div>
+        <div id="bar1" class="bar">[[finalStats.percent1]]%</div>
+        <div id="bar2" class="bar">[[finalStats.percent2]]%</div>
+      </div>
+      <div>合計[[finalStats.ttlvotes]]票</div>
+    </div>
+  </template>
+
+  <script>
+    class QuestionCell extends Polymer.Element {
+      static get is() { return 'question-cell'; }
+
+      static get properties() {
+        return {
+          question: {
+            type: Object,
+          },
+          user: {
+            type: Object,
+          },
+          statusKnown: Object,
+          stats: {
+            type: Object,
+          },
+          myAnswer: {
+            type: Object,
+            //observer: 'myAnswerChanged',
+          },
+          finalStats: Object,
+        };
+      }  
+
+      static get observers() {
+        return [
+          // '_routePageChanged(routeData.page)',
+          'newAnswerAdded(stats.splices)'
+        ];
+      }
+      
+      // myAnswerChanged(){
+      // }
+      
+      checkIfAnswered(){
+        return this.myAnswer == parseInt(this.myAnswer)
+      }
+
+      newAnswerAdded(){
+        //何票入ったか計算する
+        // console.log('hhh')
+        const finalStats = {
+          votes1:0,
+          votes2:0,
+          percent1:0,
+          percent2:0,
+          ttlvotes:0,
+        }
+        for(var i=0; i<this.stats.length; i++){
+          const stat = this.stats[i].$val
+          finalStats[`votes${stat}`]++
+          finalStats.ttlvotes++
+          console.log(stat)
+        }
+        finalStats.percent1 = Math.round(finalStats.votes1/finalStats.ttlvotes*100)
+        finalStats.percent2 = Math.round(finalStats.votes2/finalStats.ttlvotes*100)
+
+        this.$.bar1.style.width = finalStats.percent1 + '%'
+        this.$.bar2.style.width = finalStats.percent2 + '%'
+        
+        console.log(finalStats)
+
+        // this.finalStats = finalStats
+        this.set("finalStats", finalStats)
+        
+      }
+ 
+
+      inputAnswer(choice){
+        const that = this
+        const questionKey = this.question.$key
+        var promises = []
+        var promise
+        if(!this.user && this.statusKnown){
+          promise = this.$.auth.signInAnonymously()
+          promises.push(promise)
+        }
+        Promise.all(promises).then(res => {
+          console.log('成功')
+          const uid = that.user.uid
+          window.firebase.database().ref(`questions/${questionKey}/stats/${uid}`).set(choice)
+        })
+      }   
+
+      chooseAnswer1() {
+        this.inputAnswer(1)
+      }
+
+      chooseAnswer2(){
+        this.inputAnswer(2)
+
+      }
+
+    }
+
+    window.customElements.define(QuestionCell.is, QuestionCell);
+  </script>
+</dom-module>

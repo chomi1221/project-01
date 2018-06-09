@@ -75,6 +75,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     api-key="AIzaSyDPlNz1aZAzshBNZC49Y-nr6T3EFociXwc">
   </firebase-app>
 
+  <firebase-auth id="auth" user="{{user}}" on-error="handleError" status-known="{{statusKnown}}">
+  </firebase-auth>
+
     <app-location
         route="{{route}}"
         url-space-regex="^[[rootPath]]">
@@ -105,6 +108,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <app-toolbar>
             <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
             <div main-title>My App</div>
+            <div>[[user.uid]]</div>
           </app-toolbar>
         </app-header>
 
@@ -142,6 +146,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           // This shouldn't be neccessary, but the Analyzer isn't picking up
           // Polymer.Element#rootPath
           rootPath: String,
+          user: {
+            type: Object,
+          }
         };
       }
 

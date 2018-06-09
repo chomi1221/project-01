@@ -13,6 +13,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="helper/question-cell.html">
 
 <dom-module id="my-view1">
   <template>
@@ -32,9 +33,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div class="card">
         <template is="dom-repeat" items="[[questions]]">
-          <div>[[item.question]]</div>
-          <paper-button raised on-click="chooseAnswer1" data-question-key$="[[item.$key]]">[[item.answer1]]</paper-button>
-          <paper-button raised on-click="chooseAnswer2" data-question-key$="[[item.$key]]">[[item.answer2]]</paper-button>
+          <question-cell question="[[item]]" user="[[user]]"></question-cell>
         </template>          
     </div>
   </template>
@@ -55,34 +54,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Object,
           }
         };
-      }   
-
-      inputAnswer(choice,questionKey){
-        const that = this
-        var promises = []
-        var promise
-        if(!this.user && this.statusKnown){
-          promise = this.$.auth.signInAnonymously()
-          promises.push(promise)
-        }
-        Promise.all(promises).then(res => {
-          console.log('成功')
-          const uid = that.user.uid
-          window.firebase.database().ref(`questions/${questionKey}/stats/${uid}`).set(choice)
-        })
-      }   
-
-      chooseAnswer1(e) {
-        const questionKey = e.target.getAttribute('data-question-key')
-        this.inputAnswer(1,questionKey)
       }
-
-      chooseAnswer2(e){
-        const questionKey = e.target.getAttribute('data-question-key')
-        this.inputAnswer(2,questionKey)
-
-      }
-
     }
 
     window.customElements.define(MyView1.is, MyView1);

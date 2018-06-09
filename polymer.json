@@ -21,13 +21,10 @@
   },
   "builds": [
     {
-      "preset": "es5-bundled"
-    },
-    {
-      "preset": "es6-bundled"
-    },
-    {
-      "preset": "es6-unbundled"
+      "name": "default",
+      "addServiceWorker": true,
+      "css": {"minify": true},
+      "html": {"minify": true}
     }
   ]
 }
