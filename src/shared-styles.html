@@ -13,7 +13,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!-- shared styles for all views -->
 <dom-module id="shared-styles">
   <template>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
     <style>
+
+      *[hidden]{
+        display: none !important;
+      }
       .card {
         margin: 24px;
         padding: 16px;
@@ -40,6 +45,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         color: #212121;
         font-size: 22px;
       }
+
+
     </style>
   </template>
 </dom-module>

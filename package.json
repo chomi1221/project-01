@@ -4,12 +4,16 @@
   "devDependencies": {
     "eslint": "^3.19.0",
     "eslint-config-google": "^0.7.0",
-    "eslint-plugin-html": "^2.0.0"
+    "eslint-plugin-html": "^2.0.0",
+    "node-sass": "^4.9.0",
+    "nodemon": "^1.17.5"
   },
   "scripts": {
     "lint": "npm run lint:javascript && polymer lint",
     "lint:javascript": "eslint . --ext js,html --ignore-path .gitignore",
     "test": "polymer test",
-    "test:integration": "polymer build # test that psk builds without error with the CLI"
+    "test:integration": "polymer build # test that psk builds without error with the CLI",
+    "build-css": "node-sass --include-path scss scss/style.scss   src/css/style.css",
+    "watch-css": "nodemon -e scss -x \"npm run build-css\""
   }
 }

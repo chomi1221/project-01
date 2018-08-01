@@ -12,15 +12,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner-lite.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="helper/question-cell.html">
 
 <dom-module id="my-view1">
+
   <template>
     <style include="shared-styles">
       :host {
         display: block;
         padding: 10px;
+      }
+      paper-spinner-lite{
+        margin: 200px auto 0;
+        display: block;
       }
     </style>
     <firebase-auth id="auth" user="{{user}}" on-error="handleError" status-known="{{statusKnown}}">
@@ -31,8 +37,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         data="{{questions}}">
     </firebase-query>
 
-    <div class="card">
-        <template is="dom-repeat" items="[[questions]]">
+    <paper-spinner-lite active hidden$="[[questions.0]]"></paper-spinner-lite>
+
+    <div class="card" hidden$="[[!questions.0]]">
+        <template is="dom-repeat" items="[[questions]]" sort="_sort">
           <question-cell question="[[item]]" user="[[user]]"></question-cell>
         </template>          
     </div>
@@ -55,6 +63,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         };
       }
+
+      _sort(a, b){
+        if(a.$key == b.$key) return 0 //並び順を変えない
+        if(a.$key > b.$key) return -1 //並び順を変える
+        return 1
+      }
+
     }
 
     window.customElements.define(MyView1.is, MyView1);
